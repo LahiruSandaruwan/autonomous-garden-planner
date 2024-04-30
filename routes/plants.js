@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport'); // Import Passport.js for authentication
 const Plant = require('../models/Plant');
 
 // Route to create a new plant
-router.post('/', async (req, res) => {
+router.post('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const newPlant = new Plant(req.body);
     await newPlant.save();
@@ -40,7 +41,7 @@ router.get('/:plantId', async (req, res) => {
 });
 
 // Route to update plant details
-router.put('/:plantId', async (req, res) => {
+router.put('/:plantId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedPlant = await Plant.findByIdAndUpdate(req.params.plantId, req.body, { new: true });
     if (!updatedPlant) {
@@ -54,7 +55,7 @@ router.put('/:plantId', async (req, res) => {
 });
 
 // Route to delete plant
-router.delete('/:plantId', async (req, res) => {
+router.delete('/:plantId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const deletedPlant = await Plant.findByIdAndDelete(req.params.plantId);
     if (!deletedPlant) {

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport'); // Import Passport.js for authentication
 const SoilData = require('../models/SoilData');
 
 // Route to create new soil data
-router.post('/', async (req, res) => {
+router.post('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const newSoilData = new SoilData(req.body);
     await newSoilData.save();
@@ -40,7 +41,7 @@ router.get('/:soilDataId', async (req, res) => {
 });
 
 // Route to update soil data
-router.put('/:soilDataId', async (req, res) => {
+router.put('/:soilDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedSoilData = await SoilData.findByIdAndUpdate(req.params.soilDataId, req.body, { new: true });
     if (!updatedSoilData) {
@@ -54,7 +55,7 @@ router.put('/:soilDataId', async (req, res) => {
 });
 
 // Route to delete soil data
-router.delete('/:soilDataId', async (req, res) => {
+router.delete('/:soilDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const deletedSoilData = await SoilData.findByIdAndDelete(req.params.soilDataId);
     if (!deletedSoilData) {

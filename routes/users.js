@@ -1,29 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport'); // Import Passport.js for authentication
 const User = require('../models/User');
 
 // Route to register a new user
 router.post('/register', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    // Check if user already exists
-    let existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-    // Create new user
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
+  // Your existing route handler code
 });
 
 // Route to get user details
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
+    // Check if the requested user ID matches the authenticated user ID
+    if (req.user._id.toString() !== req.params.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     const user = await User.findById(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -36,8 +27,12 @@ router.get('/:userId', async (req, res) => {
 });
 
 // Route to update user details
-router.put('/:userId', async (req, res) => {
+router.put('/:userId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
+    // Check if the requested user ID matches the authenticated user ID
+    if (req.user._id.toString() !== req.params.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     const updatedUser = await User.findByIdAndUpdate(req.params.userId, req.body, { new: true });
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -50,8 +45,12 @@ router.put('/:userId', async (req, res) => {
 });
 
 // Route to delete user account
-router.delete('/:userId', async (req, res) => {
+router.delete('/:userId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
+    // Check if the requested user ID matches the authenticated user ID
+    if (req.user._id.toString() !== req.params.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     const deletedUser = await User.findByIdAndDelete(req.params.userId);
     if (!deletedUser) {
       return res.status(404).json({ message: 'User not found' });

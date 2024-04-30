@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport'); // Import Passport.js for authentication
 const ClimateData = require('../models/ClimateData');
 
 // Route to create new climate data
-router.post('/', async (req, res) => {
+router.post('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const newClimateData = new ClimateData(req.body);
     await newClimateData.save();
@@ -40,7 +41,7 @@ router.get('/:climateDataId', async (req, res) => {
 });
 
 // Route to update climate data
-router.put('/:climateDataId', async (req, res) => {
+router.put('/:climateDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedClimateData = await ClimateData.findByIdAndUpdate(req.params.climateDataId, req.body, { new: true });
     if (!updatedClimateData) {
@@ -54,7 +55,7 @@ router.put('/:climateDataId', async (req, res) => {
 });
 
 // Route to delete climate data
-router.delete('/:climateDataId', async (req, res) => {
+router.delete('/:climateDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const deletedClimateData = await ClimateData.findByIdAndDelete(req.params.climateDataId);
     if (!deletedClimateData) {
