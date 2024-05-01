@@ -2,9 +2,18 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport'); // Import Passport.js for authentication
 const SoilData = require('../models/SoilData');
+const { authenticate, authorizeUser } = require('../middlewares/authMiddleware');
+
+// Middleware to authorize based on user role
+const authorizeRole = (requiredRole) => (req, res, next) => {
+  if (!req.user || req.user.role !== requiredRole) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+  next();
+};
 
 // Route to create new soil data
-router.post('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.post('/', authenticate, authorizeRole('admin'), async (req, res) => {
   try {
     const newSoilData = new SoilData(req.body);
     await newSoilData.save();
@@ -41,7 +50,7 @@ router.get('/:soilDataId', async (req, res) => {
 });
 
 // Route to update soil data
-router.put('/:soilDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.put('/:soilDataId', authenticate, authorizeRole('admin'), async (req, res) => {
   try {
     const updatedSoilData = await SoilData.findByIdAndUpdate(req.params.soilDataId, req.body, { new: true });
     if (!updatedSoilData) {
@@ -55,7 +64,7 @@ router.put('/:soilDataId', passport.authenticate('jwt', { session: false }), asy
 });
 
 // Route to delete soil data
-router.delete('/:soilDataId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.delete('/:soilDataId', authenticate, authorizeRole('admin'), async (req, res) => {
   try {
     const deletedSoilData = await SoilData.findByIdAndDelete(req.params.soilDataId);
     if (!deletedSoilData) {
